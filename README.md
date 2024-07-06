@@ -8,7 +8,6 @@ This project is a C++ server application using the Crow framework for building R
 
 ### Compile MongoDB C Driver
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 ```bash
 cmake -G "MinGW Makefiles" -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -DCMAKE_INSTALL_PREFIX=path/to/install/dir ..

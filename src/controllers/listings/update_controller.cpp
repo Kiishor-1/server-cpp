@@ -1,14 +1,22 @@
 #include "update_controller.h"
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/json.hpp>
-#include <mongocxx/client.hpp>
-#include <mongocxx/instance.hpp>
-#include <mongocxx/uri.hpp>
 #include <crow/json.h> // Make sure this is included properly
+#include <mongocxx/exception/exception.hpp>
+#include <mongocxx/collection.hpp>
+#include "database/mongo_client.h"
 
-
-void handleUpdateListing(const crow::request &req, crow::response &res, const std::string &id, mongocxx::v_noabi::collection &collection)
+void handleUpdateListing(const crow::request &req, crow::response &res, const std::string &id, MongoClient &mongoClient)
 {
+    auto collection = mongoClient.getCollection("wanderlust2", "listings");
+    if (!collection)
+    {
+        std::cerr << "No valid collection" << std::endl;
+        res.code = 500;
+        res.write("No valid collection");
+        res.end();
+        return;
+    }
     try
     {
         auto json_body = crow::json::load(req.body);
@@ -51,6 +59,12 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
             res.code = 404;
             res.write("Listing not found");
         }
+    }
+    catch (const mongocxx::exception &e)
+    {
+        res.code = 500;
+        res.write("Failed to update listing: ");
+        res.write(e.what());
     }
     catch (const std::exception &e)
     {

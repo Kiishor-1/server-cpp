@@ -1,42 +1,54 @@
-// include/database/mongo_client.h
-// #pragma once
+#ifndef MONGO_CLIENT_H
+#define MONGO_CLIENT_H
+
+#include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
+#include <string>
+
+class MongoClient {
+public:
+    explicit MongoClient(const std::string& uri); // Ensure explicit constructor
+    mongocxx::collection getCollection(const std::string& database, const std::string& collection);
+
+private:
+    static mongocxx::instance _instance; // Ensure only one instance per application
+    mongocxx::client _client;
+};
+
+#endif // MONGO_CLIENT_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// #ifndef MONGO_CLIENT_H
+// #define MONGO_CLIENT_H
 
 // #include <mongocxx/client.hpp>
 // #include <mongocxx/instance.hpp>
-// #include <mongocxx/uri.hpp>
-// #include <bsoncxx/json.hpp>
-// #include <bsoncxx/builder/stream/document.hpp>
-// #include <mongocxx/stdx.hpp>  // Add this line
-// // #include "../stdx_optional.hpp"
-// #include <memory>
 
 // class MongoClient {
 // public:
 //     MongoClient(const std::string& uri);
-//     mongocxx::database getDatabase(std::string& db_name);
+//     mongocxx::collection getCollection(const std::string& database, const std::string& collection);
 
 // private:
-//     mongocxx::instance instance_;
-//     std::shared_ptr<mongocxx::client> client_;
+//     mongocxx::instance instance; // Ensure only one instance per application
+//     mongocxx::client client;
 // };
 
-
-#pragma once
-
-#include <mongocxx/client.hpp>
-#include <mongocxx/instance.hpp>
-#include <mongocxx/uri.hpp>
-#include <bsoncxx/json.hpp>
-#include <bsoncxx/builder/stream/document.hpp>
-#include <mongocxx/stdx.hpp>
-#include <memory>
-
-class MongoClient {
-public:
-    MongoClient(const std::string& uri);
-    mongocxx::database getDatabase(const std::string& db_name); // Changed to const std::string&
-
-private:
-    mongocxx::instance instance_;
-    std::shared_ptr<mongocxx::client> client_;
-};
+// #endif // MONGO_CLIENT_H

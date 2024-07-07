@@ -59,8 +59,8 @@ set(SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/src/main.cpp
     ${CMAKE_SOURCE_DIR}/src/routes/listings.cpp
     ${CMAKE_SOURCE_DIR}/src/routes/user.cpp
-    ${CMAKE_SOURCE_DIR}/src/controllers/listings/create_controller.cpp
     ${CMAKE_SOURCE_DIR}/src/controllers/listings/read_controller.cpp
+    ${CMAKE_SOURCE_DIR}/src/controllers/listings/create_controller.cpp
     ${CMAKE_SOURCE_DIR}/src/controllers/listings/read_one_controller.cpp
     ${CMAKE_SOURCE_DIR}/src/controllers/listings/update_controller.cpp
     ${CMAKE_SOURCE_DIR}/src/controllers/listings/delete_controller.cpp

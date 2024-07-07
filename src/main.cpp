@@ -2,6 +2,9 @@
 #include "dotenv.h"
 #include "routes/listings.h"
 #include "../include/middleware.h"
+#include "database/mongo_client.h"
+#include <mongocxx/exception/exception.hpp>
+#include <bsoncxx/json.hpp>
 
 int main() {
     // Check if we are in a development environment
@@ -16,26 +19,102 @@ int main() {
         return 1;
     }
 
-    std::cout << "MONGO_URI: " << mongo_uri << std::endl;
+    try {
+        MongoClient mongoClient{mongo_uri};
+        std::cout << "MONGO_URI: " << mongo_uri << std::endl;
+        auto collection = mongoClient.getCollection("wanderlust2", "listings");
+        std::cout << "Successfully obtained collection" << std::endl;
 
-    MyApp app;
+        MyApp app;
 
-    // Define routes
-    defineListingsRoutes(app);
+        // Define routes
+        defineListingsRoutes(app, mongoClient);
 
-    // Default route to handle non-existent routes
-    CROW_ROUTE(app, "/")
-    ([]() {
-        return crow::response(200, "Standard root");
-    });
-    CROW_ROUTE(app, "/*")
-    ([]() {
-        return crow::response(404, "Route not found");
-    });
+        // Default route to handle non-existent routes
+        CROW_ROUTE(app, "/")
+        ([]() {
+            return crow::response(200, "Standard root");
+        });
 
-    app.port(8080).multithreaded().run();
+        CROW_ROUTE(app, "/*")
+        ([]() {
+            return crow::response(404, "Route not found");
+        });
+
+        app.port(8080).multithreaded().run();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+        return 1;
+    }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+// #include "crow.h"
+// #include "dotenv.h"
+// #include "routes/listings.h"
+// #include "../include/middleware.h"
+// #include "database/mongo_client.h"
+// #include<mongocxx/exception/exception.hpp>
+// #include <bsoncxx/json.hpp>
+
+
+// int main() {
+//     // Check if we are in a development environment
+//     const char* env = std::getenv("ENVIRONMENT");
+//     if (!env || std::string(env) == "development") {
+//         dotenv::load_dotenv("../.env");
+//     }
+
+//     const char* mongo_uri = std::getenv("MONGO_URI");
+//     if (!mongo_uri) {
+//         std::cerr << "Error loading MONGO_URI from environment" << std::endl;
+//         return 1;
+//     }
+
+//     MongoClient mongoClient{mongo_uri};
+   
+//     std::cout << "MONGO_URI: " << mongo_uri << std::endl;
+//     // auto collection = mongoClient.getCollection("wanderlust2", "listings");
+
+//     // In main.cpp after initializing mongoClient
+//     try {
+//         auto collection = mongoClient.getCollection("wanderlust2", "listings");
+//         if (!collection) {
+//             throw std::runtime_error("Failed to get collection");
+//         }
+//         std::cout << "Successfully obtained collection" << std::endl;
+//     } catch (const std::exception& e) {
+//         std::cerr << "Error: " << e.what() << std::endl;
+//         return 1;
+//     }
+
+
+//     MyApp app;
+
+//     // Define routes
+//     defineListingsRoutes(app,mongoClient);
+   
+//     // Default route to handle non-existent routes
+//     CROW_ROUTE(app, "/")
+//     ([]() {
+//         return crow::response(200, "Standard root");
+//     });
+//     CROW_ROUTE(app, "/*")
+//     ([]() {
+//         return crow::response(404, "Route not found");
+//     });
+
+//     app.port(8080).multithreaded().run();
+//     return 0;
+// }
 
 // #include "crow.h"
 // #include "dotenv.h"

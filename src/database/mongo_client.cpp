@@ -1,36 +1,53 @@
-// // src/database/mongo_client.cpp
+#include "database/mongo_client.h"
+#include <iostream> // For debugging output
+
+MongoClient::MongoClient(const std::string& uri)
+    : _client(mongocxx::uri{uri}) {
+    // Ensure proper initialization
+    try {
+        std::cout << "MongoClient initialized with URI: " << uri << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error initializing MongoClient: " << e.what() << std::endl;
+        throw;
+    }
+}
+
+mongocxx::collection MongoClient::getCollection(const std::string& database, const std::string& collection) {
+    try {
+        auto db = _client[database];
+        // std::cout << "Database name: " << database << std::endl;
+        // std::cout << "Collection name: " << collection << std::endl;
+        return db[collection];
+    } catch (const std::exception& e) {
+        std::cerr << "Error getting collection: " << e.what() << std::endl;
+        throw;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // #include "database/mongo_client.h"
-// #include <mongocxx/client.hpp>
-// #include <mongocxx/instance.hpp>
-// #include <mongocxx/uri.hpp>
-// #include <bsoncxx/json.hpp>
-// #include <bsoncxx/builder/stream/document.hpp>
-// #include <mongocxx/stdx.hpp>  // Ensure this line is present
-// // #include "../../include/stdx_optional.hpp"
-// #include <memory>
 
-
-// MongoClient::MongoClient(const std::string& uri) 
-//     : client_(std::make_shared<mongocxx::client>(mongocxx::uri{uri})) {}
-
-// mongocxx::database MongoClient::getDatabase( const std::string& db_name) {
-//     return client_->database(db_name);
+// MongoClient::MongoClient(const std::string& uri)
+//     : client(mongocxx::uri{uri}) {
 // }
 
-
-
-#include "database/mongo_client.h"
-#include <mongocxx/client.hpp>
-#include <mongocxx/instance.hpp>
-#include <mongocxx/uri.hpp>
-#include <bsoncxx/json.hpp>
-#include <bsoncxx/builder/stream/document.hpp>
-#include <mongocxx/stdx.hpp>
-#include <memory>
-
-MongoClient::MongoClient(const std::string& uri) 
-    : client_(std::make_shared<mongocxx::client>(mongocxx::uri{uri})) {}
-
-mongocxx::database MongoClient::getDatabase(const std::string& db_name) { // Changed to const std::string&
-    return client_->database(db_name);
-}
+// mongocxx::collection MongoClient::getCollection(const std::string& database, const std::string& collection) {
+//     return client[database][collection];
+// }

@@ -25,8 +25,7 @@ void defineUserRoutes(AppType &app)
                                              loginMiddleware.before_handle(req, res, ctx);
                                              if (res.code != 200) return;
                                              handleCreateUser(req, res); 
-                                             loginMiddleware.after_handle(req, res, ctx);
-                                         });
+                                             loginMiddleware.after_handle(req, res, ctx); });
 
     // Define route for reading a user (with isLoggedIn middleware)
     CROW_ROUTE(app, "/users/read")
@@ -35,41 +34,16 @@ void defineUserRoutes(AppType &app)
                                             loginMiddleware.before_handle(req, res, ctx);
                                             if (res.code != 200) return;
                                             handleReadUser(req, res); 
-                                            loginMiddleware.after_handle(req, res, ctx);
-                                        });
+                                            loginMiddleware.after_handle(req, res, ctx); });
 }
 
 // Explicit template instantiation for the expected App type
 template void defineUserRoutes<MyApp>(MyApp &app);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//#include "user.h"
-// #include "../controllers/user/create_controller.h"
-// #include "../controllers/user/read_controller.h"
-// #include "../../include/middleware.h" // Adjust the path as needed
-
+// #include "user.h"
+//  #include "../controllers/user/create_controller.h"
+//  #include "../controllers/user/read_controller.h"
+//  #include "../../include/middleware.h" // Adjust the path as needed
 
 // // Undefine CROW_ROUTE to avoid redefinition warning
 // #ifdef CROW_ROUTE

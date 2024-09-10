@@ -1,6 +1,7 @@
 # Build output
 build/
 .env
+docker/
 
 # Ignore object files and executables
 *.obj

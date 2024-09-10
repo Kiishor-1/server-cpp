@@ -22,9 +22,8 @@ namespace dotenv {
             std::string name = line.substr(0, delimiterPos);
             std::string value = line.substr(delimiterPos + 1);
 
-            // Using putenv instead of setenv
-            std::string envSetting = name + "=" + value;
-            if (putenv(const_cast<char*>(envSetting.c_str())) != 0) {
+            // Use setenv() if available
+            if (setenv(name.c_str(), value.c_str(), 1) != 0) {
                 std::cerr << "Failed to set environment variable: " << name << std::endl;
             }
         }

@@ -1,11 +1,11 @@
-# Use the official Ubuntu 20.04 image as a base
-FROM ubuntu:20.04
+# Stage 1: Build the application
+FROM ubuntu:20.04 AS build-stage
 
 # Set timezone to Indian Standard Time
 ENV TZ=Asia/Kolkata
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install dependencies
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     g++ \
     cmake \
@@ -20,9 +20,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Link Python to Python3
-RUN ln -s /usr/bin/python3 /usr/bin/python
-
 # Clone and build Crow
 RUN git clone https://github.com/Kiishor-1/Crow /tmp/crow && \
     cd /tmp/crow && \
@@ -31,11 +28,10 @@ RUN git clone https://github.com/Kiishor-1/Crow /tmp/crow && \
     cmake -DCMAKE_CXX_STANDARD=17 .. && \
     make install
 
-
 # Copy MongoDB C driver from local files instead of cloning
 COPY ./docker/mongo-c-driver /tmp/mongo-c-driver
 
-# Remove existing cmake-build folder if it exists, then build and install MongoDB C driver
+# Build and install MongoDB C driver
 RUN cd /tmp/mongo-c-driver && \
     rm -rf cmake-build && \
     mkdir cmake-build && \
@@ -54,26 +50,47 @@ RUN cd /tmp/mongo-cxx-driver && \
     make -j8 && make install && \
     rm -rf /tmp/mongo-cxx-driver
 
-# Copy the application source code to the container
+# Copy the application source code
 COPY . /app
-
-# Set environment variables using ENV
-ENV ENVIRONMENT=development \
-    MONGO_URI=mongodb+srv://MyServer:B9OT0rVauDjczMTi@cluster0.qoifz6m.mongodb.net/wanderlust2?retryWrites=true&w=majority
-
-# Copy the .env file to the container's parent directory
-# COPY .env /app/.env
 
 # Build the application
 WORKDIR /app
-
-# Clean up any existing build folder to avoid CMake cache issues
-RUN rm -rf build
-
-RUN mkdir -p build && \
+RUN rm -rf build && \
+    mkdir -p build && \
     cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local .. && \
-    make -j4 
+    make -j4
+
+# Stage 2: Create the final image
+FROM ubuntu:20.04 AS runtime-stage
+
+# Set timezone to Indian Standard Time
+ENV TZ=Asia/Kolkata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libboost-system-dev \
+    libssl-dev \
+    curl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy the necessary shared libraries for MongoDB C++ driver
+COPY --from=build-stage /usr/local/lib/libmongoc-1.0.so* /usr/local/lib/
+COPY --from=build-stage /usr/local/lib/libbson-1.0.so* /usr/local/lib/
+COPY --from=build-stage /usr/local/lib/libmongocxx.so* /usr/local/lib/
+COPY --from=build-stage /usr/local/lib/libbsoncxx.so* /usr/local/lib/
+
+# Set environment variables
+ENV ENVIRONMENT=development \
+    MONGO_URI=mongodb+srv://MyServer:B9OT0rVauDjczMTi@cluster0.qoifz6m.mongodb.net/wanderlust2?retryWrites=true&w=majority
+
+# Copy only the necessary files from the build stage
+COPY --from=build-stage /app/build/CrowServer /app/build/CrowServer
+COPY --from=build-stage /app/build /app/build
+
+# Set the working directory
+WORKDIR /app
 
 # Set the entry point for the container
 ENTRYPOINT ["/app/build/CrowServer"]

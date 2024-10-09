@@ -2,13 +2,9 @@
 #define USER_H
 
 #include "crow.h"
+#include "database/mongo_client.h"
 
-// Template declaration
-template <typename AppType>
-void defineUserRoutes(AppType& app);
-
-// void defineUserRoutes(crow::SimpleApp& app);
-
-
+template <class AppType>
+void defineUserRoutes(AppType& app, MongoClient& mongoClient);
 
 #endif // USER_H

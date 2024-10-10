@@ -25,8 +25,6 @@ void handleCreateListing(const crow::request &req, crow::response &res, MongoCli
         return;
     }
 
-    std::cout<<"checkOne"<<std::endl;
-
     try
     {
         // Parse the JSON body of the request
@@ -49,12 +47,10 @@ void handleCreateListing(const crow::request &req, crow::response &res, MongoCli
             return;
         }
 
-        std::cout<<"checkTwo"<<std::endl;
         // Create a `Listing` object from the JSON body
         Listing listing = Listing::fromJson(json_body);
 
         // Validate the listing fields
-        std::cout<<"checkThree"<<std::endl;
         listing.validate();
 
         // Convert the `Listing` object to BSON
@@ -76,7 +72,6 @@ void handleCreateListing(const crow::request &req, crow::response &res, MongoCli
         document << bsoncxx::builder::stream::concatenate(listing.toBson());
 
         // Insert the document into the collection
-        std::cout<<"checkFour"<<std::endl;
         collection.insert_one(document.view());
 
         // Send a successful response

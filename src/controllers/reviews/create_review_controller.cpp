@@ -28,7 +28,6 @@ void handleCreateReview(const crow::request &req, crow::response &res, MongoClie
         return;
     }
 
-    std::cout << "one" << std::endl;
 
     try
     {
@@ -44,12 +43,9 @@ void handleCreateReview(const crow::request &req, crow::response &res, MongoClie
         }
 
         // Create a `Review` object from the JSON body, excluding user and listing
-        std::cout << "two" << std::endl;
         Review review = Review::fromJson(json_body);
         review.user = user_id;      // Set the user ID from the context
         review.listing = listingId; // Set the listing ID from the URL
-
-        std::cout << "three" << std::endl;
 
         // Get current time
         auto now = std::chrono::system_clock::now();
@@ -58,14 +54,11 @@ void handleCreateReview(const crow::request &req, crow::response &res, MongoClie
         oss << std::put_time(std::localtime(&now_c), "%Y-%m-%d %H:%M:%S");
         review.date = oss.str(); // Set the date as a string in the desired format
 
-        std::cout << "four" << std::endl;
         // Validate the review fields
         review.validate();
 
-        std::cout << "five" << std::endl;
         // Convert the `Review` object to BSON
         bsoncxx::document::value reviewDoc = review.toBson();
-        std::cout << "six" << std::endl;
         // Insert the review into the reviews collection
         auto result = reviewCollection.insert_one(reviewDoc.view());
         if (!result)
@@ -75,7 +68,6 @@ void handleCreateReview(const crow::request &req, crow::response &res, MongoClie
             res.end();
             return;
         }
-        std::cout << "seven" << std::endl;
         bsoncxx::oid reviewId = result->inserted_id().get_oid().value; // Get the inserted review ID
 
         // Update the listing by adding the review ID to its reviews array
@@ -83,7 +75,6 @@ void handleCreateReview(const crow::request &req, crow::response &res, MongoClie
             bsoncxx::builder::stream::document{} << "_id" << bsoncxx::oid{listingId} << bsoncxx::builder::stream::finalize,
             bsoncxx::builder::stream::document{} << "$push" << bsoncxx::builder::stream::open_document << "reviews" << bsoncxx::oid{reviewId} << bsoncxx::builder::stream::close_document << bsoncxx::builder::stream::finalize);
 
-        std::cout << "eight" << std::endl;
 
         if (!updateResult || updateResult->modified_count() == 0)
         {

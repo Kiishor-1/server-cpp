@@ -51,8 +51,6 @@ void handleInitBooking(const crow::request &req, crow::response &res, MongoClien
             return;
         }
 
-        std::cout << "tik tik1" << std::endl;
-
         // Parse booking details
         auto checkInStr = body["checkIn"].s();
         auto checkOutStr = body["checkOut"].s();
@@ -62,12 +60,9 @@ void handleInitBooking(const crow::request &req, crow::response &res, MongoClien
             static_cast<int>(body["guests"]["infants"].i())   // Cast to avoid narrowing conversion
         };
 
-        std::cout << "tik tik2" << std::endl;
-
         std::chrono::system_clock::time_point checkIn = std::chrono::system_clock::now();  // Conversion from string needed
         std::chrono::system_clock::time_point checkOut = std::chrono::system_clock::now(); // Conversion from string needed
 
-        std::cout << "tik tik3" << std::endl;
         // Find the listing
         bsoncxx::oid listingOid{listingId};
         bsoncxx::builder::stream::document listingFilter{};
@@ -80,7 +75,6 @@ void handleInitBooking(const crow::request &req, crow::response &res, MongoClien
             res.end();
             return;
         }
-        std::cout << "tik tik4" << std::endl;
         auto listingView = listingDoc->view();
         // double price = listingView["price"].get_double();
         // double priceAfterTax = listingView["priceAfterTax"].get_double();
@@ -109,7 +103,6 @@ void handleInitBooking(const crow::request &req, crow::response &res, MongoClien
 
         // Calculate total rent
         double totalRent = calculateTotalRent(checkIn, checkOut, price, priceAfterTax, guests);
-        std::cout << "tik tik4" << std::endl;
         // Create a new booking
         bsoncxx::builder::stream::document bookingDoc{};
         bookingDoc << "user" << bsoncxx::oid{userId}
@@ -136,7 +129,6 @@ void handleInitBooking(const crow::request &req, crow::response &res, MongoClien
 
         bsoncxx::oid bookingId = result->inserted_id().get_oid().value;
 
-        std::cout << "tik tik6" << std::endl;
         // Update user bookings
         bsoncxx::builder::stream::document userFilter{};
         userFilter << "_id" << bsoncxx::oid{userId};

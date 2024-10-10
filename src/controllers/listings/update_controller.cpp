@@ -23,7 +23,6 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
         res.end();
         return;
     }
-    std::cout << "debug0" << std::endl;
     try
     {
         auto json_body = crow::json::load(req.body);
@@ -34,7 +33,6 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
             res.end();
             return;
         }
-        std::cout << "debug1" << std::endl;
 
         bsoncxx::oid oid{id};
         bsoncxx::builder::stream::document filter{};
@@ -49,11 +47,9 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
             res.end();
             return;
         }
-        std::cout << "debug2" << std::endl;
 
         auto listing_view = listing_doc->view();
         std::string owner = listing_view["owner"].get_oid().value.to_string();
-        std::cout << "debug3" << std::endl;
         // Check if the user is the owner of the listing
         if (owner != user_id)
         {
@@ -64,7 +60,6 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
         }
         std::string category = json_body["category"].s();
         std::cout << "category is " << category << std::endl;
-        std::cout << "debug4" << std::endl;
 
         // Create a Listing object from the current database document
         Listing current_listing = Listing::fromJson(crow::json::load(bsoncxx::to_json(listing_view)));
@@ -85,7 +80,6 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
         if (json_body.has("description"))
             current_listing.description = json_body["description"].s();
 
-        std::cout << "debug4.1" << std::endl;
 
         if (json_body.has("category"))
         {
@@ -100,7 +94,6 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
             }
             current_listing.category = category;
         }
-        std::cout << "debug4.2" << std::endl;
         if (json_body.has("image"))
         {
             current_listing.image.url = json_body["image"]["url"].s();
@@ -111,19 +104,17 @@ void handleUpdateListing(const crow::request &req, crow::response &res, const st
             current_listing.geometry.coordinates[0] = json_body["geometry"]["coordinates"][0].d();
             current_listing.geometry.coordinates[1] = json_body["geometry"]["coordinates"][1].d();
         }
-        std::cout << "debug5" << std::endl;
+
 
         // Validate updated listing
         current_listing.validate();
-
-        std::cout << "debug6" << std::endl;
 
         // Convert the updated listing back to BSON
         bsoncxx::builder::stream::document update_doc{};
         update_doc << "$set" << bsoncxx::builder::stream::open_document
                    << bsoncxx::builder::stream::concatenate(current_listing.toBson())
                    << bsoncxx::builder::stream::close_document;
-        std::cout << "debug7" << std::endl;
+
         auto result = collection.update_one(filter.view(), update_doc.view());
         if (result && result->modified_count() == 1)
         {

@@ -24,8 +24,6 @@ void handleDeleteListing(const crow::request &req, crow::response &res, const st
         return;
     }
 
-    std::cout << "triggered 1" << std::endl;
-
     try
     {
         bsoncxx::oid oid{id};
@@ -41,8 +39,6 @@ void handleDeleteListing(const crow::request &req, crow::response &res, const st
             res.end();
             return;
         }
-
-        std::cout << "triggered 2" << std::endl;
         auto listing_view = listing->view();
         std::string owner = listing_view["owner"].get_oid().value.to_string();
 
@@ -54,8 +50,6 @@ void handleDeleteListing(const crow::request &req, crow::response &res, const st
             res.end();
             return;
         }
-
-        std::cout << "triggered 2.5" << std::endl;
 
         // Log the reviews field to see its structure
         if (listing_view["reviews"] && listing_view["reviews"].type() == bsoncxx::type::k_array)
@@ -97,8 +91,6 @@ void handleDeleteListing(const crow::request &req, crow::response &res, const st
         {
             std::cout << "No reviews field or reviews is not an array" << std::endl;
         }
-
-        std::cout << "triggered 4" << std::endl;
 
         // Proceed to delete the listing
         auto result = collection.delete_one(filter.view());

@@ -33,7 +33,6 @@ void defineReviewsRoutes(AppType &app, MongoClient &mongoClient)
                                                                                  {
         auto& auth_context = app.template get_context<AuthMiddleware>(req);  // Get AuthMiddleware context
         std::string user_id = auth_context.user_id;
-        std::cout<<"check"<<std::endl;
         std::cout<<"user's ID is"<<user_id<<std::endl;
         if (user_id.empty()) {
             res.code = 403;
